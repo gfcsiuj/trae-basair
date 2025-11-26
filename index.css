@@ -1,1 +1,117 @@
-/* This file is intentionally left blank to revert a previous design change. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    /* Light Theme - Modern & Premium */
+    --primary: #10b981; /* Emerald 500 */
+    --primary-light: #34d399; /* Emerald 400 */
+    --primary-dark: #059669; /* Emerald 600 */
+    --secondary: #8b5cf6; /* Violet 500 */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f9fafb; /* Gray 50 */
+    --bg-tertiary: #f3f4f6; /* Gray 100 */
+    --text-primary: #111827; /* Gray 900 */
+    --text-secondary: #6b7280; /* Gray 500 */
+    --text-tertiary: #9ca3af; /* Gray 400 */
+    --border: #e5e7eb; /* Gray 200 */
+}
+
+html[data-theme="dark"] {
+    /* Dark Theme - Deep & Elegant */
+    --primary: #06b6d4; /* Cyan 500 */
+    --primary-light: #22d3ee; /* Cyan 400 */
+    --primary-dark: #0891b2; /* Cyan 600 */
+    --secondary: #a78bfa; /* Violet 400 */
+    --bg-primary: #0c111d; /* Custom deep navy */
+    --bg-secondary: #1a202e; /* Custom slate blue */
+    --bg-tertiary: #2d3748; /* Gray 700 */
+    --text-primary: #f9fafb; /* Gray 50 */
+    --text-secondary: #d1d5db; /* Gray 300 */
+    --text-tertiary: #9ca3af; /* Gray 400 */
+    --border: #374151; /* Gray 700 */
+}
+
+html[data-theme="sepia"] {
+    /* Sepia Theme - Warm & Comfortable */
+    --primary: #92400e; /* Amber 800 */
+    --primary-light: #b45309; /* Amber 700 */
+    --primary-dark: #78350f; /* Amber 900 */
+    --secondary: #ea580c; /* Orange 600 */
+    --bg-primary: #fefce8; /* Yellow 50 */
+    --bg-secondary: #fef3c7; /* Amber 100 */
+    --bg-tertiary: #fde68a; /* Amber 200 */
+    --text-primary: #292524; /* Stone 800 */
+    --text-secondary: #57534e; /* Stone 600 */
+    --text-tertiary: #78716c; /* Stone 500 */
+    --border: #fcd34d; /* Amber 300 */
+}
+
+html[data-theme="blue"] {
+    /* Blue Theme - Calm & Serene */
+    --primary: #2563eb; /* Blue 600 */
+    --primary-light: #3b82f6; /* Blue 500 */
+    --primary-dark: #1d4ed8; /* Blue 700 */
+    --secondary: #0ea5e9; /* Sky 500 */
+    --bg-primary: #eff6ff; /* Blue 50 */
+    --bg-secondary: #dbeafe; /* Blue 100 */
+    --bg-tertiary: #bfdbfe; /* Blue 200 */
+    --text-primary: #1e3a8a; /* Blue 900 */
+    --text-secondary: #1e40af; /* Blue 800 */
+    --text-tertiary: #3b82f6; /* Blue 500 */
+    --border: #93c5fd; /* Blue 300 */
+}
+
+body {
+    font-family: 'Rubik', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 10px;
+}
+
+@font-face {
+    font-family: 'quran-common';
+    src: url('/quran-common.ttf');
+    font-display: swap;
+}
+
+/* Glassmorphism Utilities */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+html[data-theme="dark"] .glass-panel {
+    background: rgba(12, 17, 29, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-button {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.glass-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}

@@ -15,7 +15,7 @@ const MainReadingInterface: React.FC = () => {
     const initialPinchDistance = useRef(0);
     const lastFontSize = useRef(state.fontSize);
     const gestureState = useRef<'none' | 'swipe' | 'pinch'>('none');
-    
+
     const [isDesktopView, setIsDesktopView] = useState(window.innerWidth > 1024);
 
     useEffect(() => {
@@ -26,10 +26,10 @@ const MainReadingInterface: React.FC = () => {
             actions.loadPage(state.currentPage);
         };
         mediaQuery.addEventListener('change', handleResize);
-        
+
         return () => mediaQuery.removeEventListener('change', handleResize);
     }, [actions, state.currentPage]);
-    
+
     const getDistance = (touches: React.TouchList) => {
         const [touch1, touch2] = [touches[0], touches[1]];
         return Math.sqrt(
@@ -59,10 +59,10 @@ const MainReadingInterface: React.FC = () => {
             e.preventDefault();
             const newDistance = getDistance(e.touches);
             const scale = newDistance / (initialPinchDistance.current || 1); // Avoid division by zero
-            
+
             let newSize = Math.round(lastFontSize.current * scale);
             newSize = Math.max(16, Math.min(36, newSize)); // Clamp font size
-            
+
             if (newSize !== state.fontSize) {
                 actions.setFontSize(newSize);
             }
@@ -97,11 +97,11 @@ const MainReadingInterface: React.FC = () => {
             initialPinchDistance.current = 0;
         }
     };
-    
+
     useEffect(() => {
         const mainContentEl = mainContentRef.current;
         if (mainContentEl) {
-             mainContentEl.scrollTo(0, 0);
+            mainContentEl.scrollTo(0, 0);
         }
     }, [state.currentPage]);
 
@@ -110,7 +110,7 @@ const MainReadingInterface: React.FC = () => {
             if (state.activePanel || state.selectedAyah || state.selectedWord) return;
 
             const pageIncrement = isDesktopView ? 2 : 1;
-            
+
             if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
                 actions.recordUserActivity();
                 if (e.key === 'ArrowLeft' && state.currentPage < TOTAL_PAGES) { // Next page for RTL (turn left page)
@@ -141,16 +141,16 @@ const MainReadingInterface: React.FC = () => {
     // Define heights for padding calculation
     const isAudioOpen = !isDesktopView && state.activePanel === Panel.Audio;
     const headerVisibleHeight = `calc(4.5rem + env(safe-area-inset-top, 0rem))`;
-    const bottomNavVisibleHeight = isDesktopView ? '0rem' : `calc(${isAudioOpen ? '13rem' : '4.5rem'} + env(safe-area-inset-bottom, 0rem))`;
-    
+    const bottomNavVisibleHeight = `calc(${isAudioOpen ? '13rem' : '4.5rem'} + env(safe-area-inset-bottom, 0rem))`;
+
     // When UI is hidden, padding should only account for safe areas to prevent content from going under notches.
     const headerHiddenHeight = `env(safe-area-inset-top, 0rem)`;
-    const bottomNavHiddenHeight = isDesktopView ? '0rem' : `env(safe-area-inset-bottom, 0rem)`;
+    const bottomNavHiddenHeight = `env(safe-area-inset-bottom, 0rem)`;
 
     return (
         <div className="h-full w-full">
             <Header />
-            <main 
+            <main
                 ref={mainContentRef}
                 className="h-full w-full overflow-y-auto custom-scrollbar bg-bg-secondary"
                 style={{
@@ -172,7 +172,7 @@ const MainReadingInterface: React.FC = () => {
             >
                 {renderContent()}
             </main>
-            {!isDesktopView && <BottomNav />}
+            <BottomNav />
         </div>
     );
 };

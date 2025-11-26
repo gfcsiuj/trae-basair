@@ -38,7 +38,7 @@ const AIAssistant: React.FC = () => {
     const { isAIAssistantOpen, aiAutoPrompt, activePanel } = state;
 
     const [isRendered, setIsRendered] = useState(isAIAssistantOpen);
-    
+
     // Swipe to dismiss state
     const [translateY, setTranslateY] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
@@ -166,7 +166,7 @@ const AIAssistant: React.FC = () => {
         if (!userMessageText.trim() || isLoading || !state.ai) return;
 
         const userMessage: Message = { text: userMessageText, sender: 'user' };
-        
+
         setMessages(prev => [...prev, userMessage]);
         if (!promptOverride) {
             setInput('');
@@ -205,7 +205,7 @@ const AIAssistant: React.FC = () => {
                     }
                 } else if (call.name === 'navigateToVerse') {
                     const verseKey = call.args.verseKey as string;
-                     try {
+                    try {
                         const verseData = await actions.fetchWithRetry<{ verse: { page_number: number } }>(`${API_BASE}/verses/by_key/${verseKey}`);
                         await actions.loadPage(verseData.verse.page_number);
                         functionResult = `تم الانتقال إلى الآية ${verseKey}`;
@@ -224,7 +224,7 @@ const AIAssistant: React.FC = () => {
                                 const range = juz.verse_mapping[firstSurah];
                                 const firstVerseNum = range.split('-')[0];
                                 const firstVerseKey = `${firstSurah}:${firstVerseNum}`;
-                                
+
                                 const verseData = await actions.fetchWithRetry<{ verse: { page_number: number } }>(`${API_BASE}/verses/by_key/${firstVerseKey}`);
                                 await actions.loadPage(verseData.verse.page_number);
                                 functionResult = `تم الانتقال إلى الجزء ${juzNumber}`;
@@ -233,13 +233,13 @@ const AIAssistant: React.FC = () => {
                                 functionResult = `لم أتمكن من العثور على بداية الجزء ${juzNumber}`;
                             }
                         } catch (err) {
-                             functionResult = `حدث خطأ أثناء الانتقال إلى الجزء ${juzNumber}`;
+                            functionResult = `حدث خطأ أثناء الانتقال إلى الجزء ${juzNumber}`;
                         }
                     } else {
                         functionResult = `رقم الجزء ${juzNumber} غير صالح.`;
                     }
                 }
-                
+
                 chatHistory.current.push({ role: 'model', parts: response.candidates![0].content.parts });
                 chatHistory.current.push({
                     role: 'function',
@@ -271,92 +271,112 @@ const AIAssistant: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [input, isLoading, state.ai]);
 
     useEffect(() => {
         if (aiAutoPrompt && isAIAssistantOpen) {
             sendMessage(aiAutoPrompt);
-            actions.setState(s => ({...s, aiAutoPrompt: null }));
+            actions.setState(s => ({ ...s, aiAutoPrompt: null }));
         }
     }, [aiAutoPrompt, isAIAssistantOpen, sendMessage, actions]);
 
     if (state.readingMode === 'memorization') return null;
 
     const isAudioPanelOpen = activePanel === Panel.Audio;
-    const fabBottomPosition = isAudioPanelOpen
-        ? 'calc(13rem + 0.5rem + env(safe-area-inset-bottom, 0rem))'
-        : 'calc(5rem + env(safe-area-inset-bottom, 0rem))';
+    // FAB position is now fixed at the top, so we don't need dynamic bottom calculation based on audio panel
+    const fabTopPosition = 'calc(1.25rem + env(safe-area-inset-top, 0rem))'; // 5 (1.25rem) from top
+
 
 
     return (
         <>
-            <button 
+            <button
                 onClick={() => actions.setState(s => ({ ...s, isAIAssistantOpen: !s.isAIAssistantOpen }))}
-                className={`ai-fab fixed left-5 w-14 h-14 bg-gradient-to-br from-primary to-primary-light text-white rounded-full flex items-center justify-center shadow-lg z-30 transition-all duration-300 hover:scale-110 ${state.isUIVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-                style={{ bottom: fabBottomPosition }}
+                className={`ai-fab fixed left-5 w-14 h-14 bg-gradient-to-br from-primary via-primary-light to-primary text-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(var(--primary),0.4)] z-30 transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.6)] ${state.isUIVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                style={{ top: fabTopPosition }}
             >
                 <i className={`fas ${isAIAssistantOpen ? 'fa-times' : 'fa-robot'} text-2xl transition-transform duration-300 ${isAIAssistantOpen ? 'rotate-180' : ''}`}></i>
             </button>
             {isRendered && (
-                <div 
+                <div
                     onAnimationEnd={handleAnimationEnd}
-                    className={`ai-window fixed inset-0 md:inset-auto md:bottom-[calc(8.75rem+env(safe-area-inset-bottom,0rem))] md:left-5 md:right-auto md:w-96 md:h-[60vh] md:max-h-[500px] bg-bg-primary border border-border md:rounded-2xl shadow-xl flex flex-col z-40 ${isAIAssistantOpen ? 'animate-slideInUp' : 'animate-slideOutDown'}`}
+                    className={`ai-window fixed inset-0 md:inset-auto md:top-[calc(5rem+env(safe-area-inset-top,0rem))] md:left-5 md:right-auto md:w-96 md:h-[60vh] md:max-h-[600px] glass-panel md:rounded-3xl shadow-2xl flex flex-col z-40 ${isAIAssistantOpen ? 'animate-slideInDown' : 'animate-slideOutUp'}`}
                     style={panelStyle}
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
                 >
-                    <div className="w-full flex justify-center pt-3 shrink-0">
-                         <div className="w-12 h-1.5 bg-bg-tertiary rounded-full"></div>
+                    <div className="w-full flex justify-center pt-3 shrink-0 md:hidden">
+                        <div className="w-12 h-1.5 bg-gray-300/50 rounded-full"></div>
                     </div>
-                    <div 
-                        className="panel-header flex items-center justify-between p-3 text-text-primary md:rounded-t-2xl shrink-0"
+                    <div
+                        className="panel-header flex items-center justify-between p-4 text-text-primary md:rounded-t-3xl shrink-0 border-b border-border/50"
                     >
                         <div className="flex items-center gap-3">
-                            <i className="fas fa-robot text-primary"></i>
-                            <h3 className="font-bold">المساعد الذكي: عبد الحكيم</h3>
+                            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                                <i className="fas fa-robot text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-lg">عبد الحكيم</h3>
+                                <p className="text-xs text-text-secondary">مساعدك الذكي</p>
+                            </div>
                         </div>
-                        <button onClick={onDismiss} className="p-2 hover:bg-bg-secondary rounded-full md:hidden"><i className="fas fa-times"></i></button>
+                        <button onClick={onDismiss} className="p-2 hover:bg-black/5 rounded-full md:hidden"><i className="fas fa-times"></i></button>
                     </div>
 
-                    <div className="flex-1 p-4 overflow-y-auto custom-scrollbar">
+                    <div className="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-4">
                         {messages.map((msg, index) => (
-                            <div key={index} className={`flex gap-2.5 mb-4 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}>
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.sender === 'user' ? 'bg-blue-500' : 'bg-primary'}`}>
-                                    <i className={`fas ${msg.sender === 'user' ? 'fa-user' : 'fa-robot'} text-white text-sm`}></i>
+                            <div key={index} className={`flex gap-3 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm ${msg.sender === 'user' ? 'bg-blue-500' : 'bg-primary'}`}>
+                                    <i className={`fas ${msg.sender === 'user' ? 'fa-user' : 'fa-robot'} text-white text-xs`}></i>
                                 </div>
-                                <div className={`p-3 rounded-xl max-w-[80%] ${msg.sender === 'user' ? 'bg-blue-100 dark:bg-blue-900/40 rounded-br-none' : 'bg-bg-secondary rounded-bl-none'}`}>
-                                    <p className="text-sm text-text-primary whitespace-pre-wrap">{msg.text}</p>
+                                <div className={`p-3.5 rounded-2xl max-w-[85%] shadow-sm text-sm leading-relaxed ${msg.sender === 'user' ? 'bg-blue-500 text-white rounded-br-none' : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-text-primary rounded-bl-none border border-white/20'}`}>
+                                    <p className="whitespace-pre-wrap">{msg.text}</p>
                                 </div>
                             </div>
                         ))}
-                         {isLoading && (
-                            <div className="flex gap-2.5 mb-4">
-                                <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-primary">
-                                    <i className="fas fa-robot text-white text-sm"></i>
+                        {isLoading && (
+                            <div className="flex gap-3">
+                                <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-primary shadow-sm">
+                                    <i className="fas fa-robot text-white text-xs"></i>
                                 </div>
-                                <div className="p-3 rounded-xl max-w-[80%] bg-bg-secondary rounded-bl-none">
-                                    <i className="fas fa-spinner fa-pulse"></i>
+                                <div className="p-4 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-bl-none border border-white/20 shadow-sm">
+                                    <div className="flex gap-1">
+                                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                    </div>
                                 </div>
                             </div>
                         )}
                         <div ref={messagesEndRef} />
                     </div>
 
-                    <div 
-                        className="p-2 border-t border-border"
-                        style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom, 0rem))' }}
+                    <div
+                        className="p-3 border-t border-border/50 bg-white/30 dark:bg-black/30 backdrop-blur-md md:rounded-b-3xl"
+                        style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0rem))' }}
                     >
-                        <div className="flex gap-1 overflow-x-auto pb-2">
-                           {currentSuggestions.map(s => (
-                               <button key={s} onClick={() => setInput(s)} className="text-xs px-3 py-1 bg-bg-tertiary rounded-full shrink-0 hover:bg-primary/20 transition-colors">{s}</button>
-                           ))}
+                        <div className="flex gap-2 overflow-x-auto pb-3 no-scrollbar">
+                            {currentSuggestions.map(s => (
+                                <button key={s} onClick={() => setInput(s)} className="text-xs px-4 py-2 bg-white/60 dark:bg-gray-800/60 border border-white/20 rounded-full shrink-0 hover:bg-primary hover:text-white transition-all shadow-sm whitespace-nowrap">{s}</button>
+                            ))}
                         </div>
-                        <div className="flex items-center gap-2 p-2">
-                            <input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && sendMessage()} placeholder="اسأل عبد الحكيم..." className="input flex-1 bg-bg-secondary border-border focus:border-primary !rounded-full px-4" />
-                            <button onClick={() => sendMessage()} className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center shrink-0" disabled={isLoading}>
-                                <i className="fas fa-paper-plane"></i>
+                        <div className="flex items-center gap-2 bg-white/60 dark:bg-gray-800/60 border border-white/20 rounded-full p-1.5 shadow-inner">
+                            <input
+                                type="text"
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                                placeholder="اسأل عبد الحكيم..."
+                                className="flex-1 bg-transparent border-none focus:ring-0 px-4 text-sm text-text-primary placeholder-text-tertiary"
+                            />
+                            <button
+                                onClick={() => sendMessage()}
+                                className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all shadow-md ${input.trim() ? 'bg-primary text-white hover:scale-105' : 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed'}`}
+                                disabled={isLoading || !input.trim()}
+                            >
+                                <i className="fas fa-paper-plane text-sm"></i>
                             </button>
                         </div>
                     </div>
