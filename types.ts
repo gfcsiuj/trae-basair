@@ -93,13 +93,13 @@ export interface Word {
 }
 
 export enum AyahWordState {
-  Hidden = 'hidden',
-  Waiting = 'waiting',
-  Correct = 'correct',
-  Incorrect = 'incorrect',
-  Revealed = 'revealed',
-  Hinted = 'hinted',
-  Skipped = 'skipped',
+    Hidden = 'hidden',
+    Waiting = 'waiting',
+    Correct = 'correct',
+    Incorrect = 'incorrect',
+    Revealed = 'revealed',
+    Hinted = 'hinted',
+    Skipped = 'skipped',
 }
 
 
@@ -112,8 +112,8 @@ export interface Verse {
     text_uthmani: string;
     audio?: Audio;
     words: Word[];
-    tafsirs?: {id: number, text: string}[];
-    translations?: {id: number, text: string}[];
+    tafsirs?: { id: number, text: string }[];
+    translations?: { id: number, text: string }[];
     chapter_id: number;
 }
 
@@ -220,7 +220,11 @@ export interface AppState {
     audioCurrentTime: number;
     isVerseByVerseLayout: boolean;
     favoriteReciters: number[];
+    favoriteTafsirs: number[];
+    favoriteTranslations: number[];
     isReciterModalOpen: boolean;
+    isTafsirModalOpen: boolean;
+    isTranslationModalOpen: boolean;
     isRangeModalOpen: boolean;
     wordGlyphData: { [key: string]: { id: number; text: string } } | null;
     layoutDb: Database | null;
@@ -264,7 +268,7 @@ export interface AppActions {
     setReciter: (id: number) => void;
     setTafsir: (id: number) => void;
     setTranslation: (id: number) => void;
-    fetchWithRetry: <T,>(url: string, retries?: number) => Promise<T>;
+    fetchWithRetry: <T, >(url: string, retries?: number) => Promise<T>;
     setState: Dispatch<SetStateAction<AppState>>;
     recordUserActivity: () => void;
     toggleUIVisibility: () => void;
@@ -277,6 +281,8 @@ export interface AppActions {
     toggleVerseByVerseLayout: () => void;
     getPageData: (pageNumber: number) => Promise<Verse[] | null>;
     toggleFavoriteReciter: (id: number) => void;
+    toggleFavoriteTafsir: (id: number) => void;
+    toggleFavoriteTranslation: (id: number) => void;
     loadPrayerTimes: () => Promise<void>;
     toggleNotifications: () => Promise<void>;
 }
