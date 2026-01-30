@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../hooks/useApp';
 import Bismillah from './Bismillah';
 import SurahHeader from './SurahHeader';
+import InteractiveLine from './InteractiveLine';
 import { Verse } from '../types';
 
 interface LineData {
@@ -71,7 +72,7 @@ const QuranPage: React.FC<{
             }
         }
     }, [layoutDb, currentPage]);
-    
+
     // Memoize word glyphs into a Map for fast O(1) lookups
     const memoizedWordGlyphsById = useMemo(() => {
         if (!wordGlyphData) return null;
@@ -89,7 +90,7 @@ const QuranPage: React.FC<{
         return linesForPage.map((line) => {
             let lineContent: React.ReactNode = null;
             const lineStyle: React.CSSProperties = {
-                 textAlign: line.is_centered ? 'center' : 'justify',
+                textAlign: line.is_centered ? 'center' : 'justify',
             };
 
             switch (line.line_type) {
@@ -98,10 +99,18 @@ const QuranPage: React.FC<{
                     if (surah) {
                         lineContent = <SurahHeader surah={surah} />;
                     }
-                    break;
+                    return (
+                        <div key={line.line_number} style={lineStyle}>
+                            {lineContent}
+                        </div>
+                    );
                 case 'basmallah':
                     lineContent = <Bismillah />;
-                    break;
+                    return (
+                        <div key={line.line_number} style={lineStyle}>
+                            {lineContent}
+                        </div>
+                    );
                 case 'ayah':
                     if (memoizedWordGlyphsById && line.first_word_id && line.last_word_id) {
                         let wordsInLine = '';
@@ -111,18 +120,24 @@ const QuranPage: React.FC<{
                         }
                         lineContent = wordsInLine;
                     }
-                    break;
+                    // استخدام InteractiveLine للأسطر التي تحتوي على آيات
+                    return (
+                        <InteractiveLine
+                            key={line.line_number}
+                            lineStyle={lineStyle}
+                            lineNumber={line.line_number}
+                            pageVerses={pageVerses}
+                            firstWordId={line.first_word_id}
+                            lastWordId={line.last_word_id}
+                        >
+                            {lineContent}
+                        </InteractiveLine>
+                    );
                 default:
-                    lineContent = null;
+                    return null;
             }
-            
-            return (
-                <div key={line.line_number} style={lineStyle}>
-                    {lineContent}
-                </div>
-            );
         });
-    }, [linesForPage, surahs, memoizedWordGlyphsById]);
+    }, [linesForPage, surahs, memoizedWordGlyphsById, pageVerses]);
 
     if (isLoading && !pageContent) {
         return (
@@ -133,7 +148,7 @@ const QuranPage: React.FC<{
             </div>
         );
     }
-    
+
     if (error) {
         return <div className="p-6 text-center text-red-500">{error}</div>;
     }
@@ -141,26 +156,26 @@ const QuranPage: React.FC<{
     if (!pageContent) {
         return null;
     }
-    
+
     const pageStyle: React.CSSProperties = {
         fontFamily: font === 'qpc-v1' ? 'QuranPageFontV2' : 'inherit',
         fontSize: `${fontSize}px`,
         direction: 'rtl',
         lineHeight: 2.2,
     };
-    
+
     const juzNumber = pageVerses?.[0]?.juz_number;
     const PageJuzHeader = () => {
-         if (!juzNumber) return null;
-         const paddedJuz = String(juzNumber).padStart(3, '0');
-         const juzLigature = `juz${paddedJuz}`;
-         const juzNameLigature = `j${paddedJuz}`;
-         return (
-             <div className="flex justify-between items-center text-lg mb-4 text-primary px-2" style={{fontFamily: 'quran-common', fontFeatureSettings: '"calt", "liga"' }}>
+        if (!juzNumber) return null;
+        const paddedJuz = String(juzNumber).padStart(3, '0');
+        const juzLigature = `juz${paddedJuz}`;
+        const juzNameLigature = `j${paddedJuz}`;
+        return (
+            <div className="flex justify-between items-center text-lg mb-4 text-primary px-2" style={{ fontFamily: 'quran-common', fontFeatureSettings: '"calt", "liga"' }}>
                 <span>{juzLigature}</span>
                 <span>{juzNameLigature}</span>
             </div>
-         );
+        );
     };
 
     return (

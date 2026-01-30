@@ -20,7 +20,7 @@ const AyahContextMenu: React.FC = () => {
     const onDismiss = () => {
         actions.selectAyah(null);
     };
-    
+
     useEffect(() => {
         const styleId = 'context-menu-font-style';
         let styleEl = document.getElementById(styleId) as HTMLStyleElement;
@@ -87,7 +87,7 @@ const AyahContextMenu: React.FC = () => {
             setIsRendered(false);
         }
     };
-    
+
     if (!isRendered) return null;
 
     const playAudio = () => {
@@ -104,12 +104,12 @@ const AyahContextMenu: React.FC = () => {
         }
         onDismiss();
     };
-    
+
     const openAudioControls = () => {
         if (!selectedAyah) return;
         const verseIndex = state.audioQueue.findIndex(item => item.verseKey === selectedAyah.verse_key);
         if (verseIndex !== -1) {
-             actions.setState(s => ({ ...s, currentAudioIndex: verseIndex, activePanel: Panel.Audio }));
+            actions.setState(s => ({ ...s, currentAudioIndex: verseIndex, activePanel: Panel.Audio }));
         }
         onDismiss();
     };
@@ -117,7 +117,7 @@ const AyahContextMenu: React.FC = () => {
     const showTafsir = () => {
         actions.setState(s => ({ ...s, showTafsir: true, selectedAyah: s.selectedAyah }));
     };
-    
+
     const handleBookmark = () => {
         if (!selectedAyah) return;
         actions.toggleBookmark(selectedAyah);
@@ -140,14 +140,14 @@ const AyahContextMenu: React.FC = () => {
         actions.setState(s => ({ ...s, showShareImageModal: true }));
         // The modal will handle closing the context menu
     };
-    
+
     const copyText = () => {
         if (!selectedAyah) return;
         navigator.clipboard.writeText(selectedAyah.text_uthmani);
         alert('تم نسخ نص الآية');
         onDismiss();
     };
-    
+
     const addNote = () => {
         if (!selectedAyah) return;
         actions.setState(s => ({
@@ -201,15 +201,17 @@ const AyahContextMenu: React.FC = () => {
             .map(wordInfo => (wordInfo as any).text)
             .join('');
     }
-    
+
     const renderContent = () => {
         if (showShareOptions) {
             return (
-                 <div className="grid grid-cols-2 gap-3 pt-2">
+                <div className="grid grid-cols-2 gap-4 pt-2">
                     {shareMenuItems.map(item => (
-                        <button key={item.label} onClick={item.action} className="flex flex-col items-center justify-center p-3 bg-bg-secondary rounded-lg hover:bg-bg-tertiary transition-colors">
-                            <i className={`fas ${item.icon} text-2xl mb-2 text-primary`}></i>
-                            <span className="text-xs font-medium">{item.label}</span>
+                        <button key={item.label} onClick={item.action} className="context-menu-option flex flex-col items-center justify-center p-4 bg-bg-secondary rounded-xl hover:bg-bg-tertiary active:scale-95">
+                            <div className="w-14 h-14 flex items-center justify-center bg-primary/10 rounded-full mb-3">
+                                <i className={`fas ${item.icon} text-2xl text-primary`}></i>
+                            </div>
+                            <span className="text-sm font-medium">{item.label}</span>
                         </button>
                     ))}
                 </div>
@@ -218,8 +220,10 @@ const AyahContextMenu: React.FC = () => {
         return (
             <div className="grid grid-cols-4 gap-2 text-center">
                 {mainMenuItems.map(item => (
-                    <button key={item.label} onClick={item.action} className="flex flex-col items-center justify-center p-3 bg-bg-secondary rounded-lg hover:bg-bg-tertiary transition-colors space-y-2">
-                        <i className={`fas ${item.icon} text-xl text-primary`}></i>
+                    <button key={item.label} onClick={item.action} className="context-menu-option flex flex-col items-center justify-center p-3 bg-bg-secondary rounded-xl hover:bg-bg-tertiary space-y-2 active:scale-95">
+                        <div className="w-12 h-12 flex items-center justify-center bg-primary/10 rounded-full">
+                            <i className={`fas ${item.icon} text-xl text-primary`}></i>
+                        </div>
                         <span className="text-xs font-medium">{item.label}</span>
                     </button>
                 ))}
@@ -230,7 +234,7 @@ const AyahContextMenu: React.FC = () => {
     return (
         <>
             <div className={`fixed inset-0 bg-black/30 backdrop-blur-sm z-40 ${isVisible ? 'animate-fadeIn' : 'animate-fadeOut'}`} onClick={onDismiss}></div>
-            <div 
+            <div
                 onAnimationEnd={handleAnimationEnd}
                 className={`fixed bottom-0 left-0 right-0 bg-bg-primary rounded-t-2xl shadow-lg z-50 touch-none ${isVisible ? 'animate-slideInUp' : 'animate-slideOutDown'}`}
                 style={style}
@@ -241,7 +245,7 @@ const AyahContextMenu: React.FC = () => {
                 <div className="p-4 relative">
                     <div className="w-12 h-1.5 bg-bg-tertiary rounded-full mx-auto mb-4"></div>
                     {showShareOptions && (
-                        <button onClick={() => {setShowShareOptions(false);}} className="absolute top-3 left-3 w-8 h-8 flex items-center justify-center bg-bg-secondary rounded-full text-text-secondary hover:bg-bg-tertiary">
+                        <button onClick={() => { setShowShareOptions(false); }} className="absolute top-3 left-3 w-8 h-8 flex items-center justify-center bg-bg-secondary rounded-full text-text-secondary hover:bg-bg-tertiary">
                             <i className="fas fa-arrow-right"></i>
                         </button>
                     )}
