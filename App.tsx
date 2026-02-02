@@ -26,6 +26,19 @@ import AyahContextMenu from './components/AyahContextMenu';
 import SelectionModal from './components/modals/SelectionModal';
 import { AppContext } from './context';
 
+// Polyfill for crypto.randomUUID() which is not available in non-secure contexts (HTTP)
+const generateUUID = (): string => {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+    }
+    // Fallback for non-secure contexts
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+};
+
 
 // Create a context to provide state and actions to all components
 
@@ -795,7 +808,7 @@ const App: React.FC = () => {
     // New CRUD Actions
     const addKhatmah = useCallback((k: Omit<Khatmah, 'id' | 'completed' | 'pagesRead'>) => {
         setState(s => {
-            const newKhatmah: Khatmah = { ...k, id: crypto.randomUUID(), completed: false, pagesRead: 0 };
+            const newKhatmah: Khatmah = { ...k, id: generateUUID(), completed: false, pagesRead: 0 };
             const newKhatmahs = [...s.khatmahs, newKhatmah];
             localStorage.setItem('khatmahs', JSON.stringify(newKhatmahs));
             return { ...s, khatmahs: newKhatmahs };
@@ -819,7 +832,7 @@ const App: React.FC = () => {
     }, []);
 
     const addNote = useCallback((n: Omit<Note, 'id' | 'timestamp'>): Note => {
-        const newNote: Note = { ...n, id: crypto.randomUUID(), timestamp: Date.now() };
+        const newNote: Note = { ...n, id: generateUUID(), timestamp: Date.now() };
         setState(s => {
             const newNotes = [...s.notes, newNote];
             localStorage.setItem('notes', JSON.stringify(newNotes));
@@ -846,7 +859,7 @@ const App: React.FC = () => {
 
     const addTasbeehCounter = useCallback((c: Omit<TasbeehCounter, 'id' | 'lastModified' | 'count'>) => {
         setState(s => {
-            const newCounter: TasbeehCounter = { ...c, id: crypto.randomUUID(), count: 0, lastModified: Date.now() };
+            const newCounter: TasbeehCounter = { ...c, id: generateUUID(), count: 0, lastModified: Date.now() };
             const newCounters = [...s.tasbeehCounters, newCounter];
             localStorage.setItem('tasbeehCounters', JSON.stringify(newCounters));
             return { ...s, tasbeehCounters: newCounters };

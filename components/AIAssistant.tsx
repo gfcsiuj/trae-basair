@@ -284,8 +284,10 @@ const AIAssistant: React.FC = () => {
     if (state.readingMode === 'memorization') return null;
 
     const isAudioPanelOpen = activePanel === Panel.Audio;
-    // FAB position is now fixed at the top, so we don't need dynamic bottom calculation based on audio panel
-    const fabTopPosition = 'calc(6rem + env(safe-area-inset-top, 0rem))'; // 5 (1.25rem) from top
+    // FAB position at bottom - above the bottom nav
+    const fabBottomPosition = isAudioPanelOpen
+        ? 'calc(15rem + env(safe-area-inset-bottom, 0rem))'
+        : 'calc(7rem + env(safe-area-inset-bottom, 0rem))';
 
 
 
@@ -294,7 +296,7 @@ const AIAssistant: React.FC = () => {
             <button
                 onClick={() => actions.setState(s => ({ ...s, isAIAssistantOpen: !s.isAIAssistantOpen }))}
                 className={`ai-fab fixed left-5 w-14 h-14 bg-gradient-to-br from-primary via-primary-light to-primary text-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(var(--primary),0.4)] z-30 transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.6)] ${state.isUIVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-                style={{ top: fabTopPosition }}
+                style={{ bottom: fabBottomPosition }}
             >
                 <i className={`fas ${isAIAssistantOpen ? 'fa-times' : 'fa-robot'} text-2xl transition-transform duration-300 ${isAIAssistantOpen ? 'rotate-180' : ''}`}></i>
             </button>

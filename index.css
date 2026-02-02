@@ -215,3 +215,55 @@ html[data-theme="dark"] .glass-panel {
     transform: scale(0.95);
     background: var(--bg-tertiary);
 }
+
+/* Responsive Quran Text - Fixed Sizing */
+/* Prevents user from manually adjusting text size via browser/system settings */
+html {
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+/* Base Quran Line Styling - fills width like a real Quran page */
+.quran-line {
+    width: 100%;
+    text-align: justify;
+    text-align-last: center;
+    /* Center the last line or single-line verses */
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    word-spacing: 0.15em;
+    /* Slight word spacing for better justified text */
+}
+
+/* Landscape Mode Optimization */
+/* Ensures Quran text fills the screen width and allows vertical scrolling */
+@media screen and (orientation: landscape) {
+    .quran-line {
+        /* Text fills width in landscape, scrolling vertically */
+        max-width: 100%;
+        margin: 0 auto;
+        text-align: justify;
+    }
+
+    /* Ensure content area allows smooth scrolling in landscape */
+    main.custom-scrollbar {
+        scroll-behavior: smooth;
+        overscroll-behavior-y: contain;
+    }
+}
+
+/* Portrait Mode - Quran-like immersive experience */
+@media screen and (orientation: portrait) {
+    .quran-line {
+        /* Maximum width usage for immersive reading */
+        width: 100%;
+        text-align: justify;
+        text-align-last: center;
+    }
+}
+
+/* Smooth font resize transitions when orientation changes */
+[style*="font-size"] {
+    transition: font-size 0.15s ease-out, line-height 0.15s ease-out;
+}

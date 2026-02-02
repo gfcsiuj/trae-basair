@@ -152,7 +152,10 @@ export interface TasbeehCounter {
 
 export interface SearchResultItem {
     verse_key: string;
+    verse_id: number;
     text: string;
+    highlighted?: string | null;
+    words?: { char_type: string; text: string }[];
 }
 
 export interface SearchResponse {

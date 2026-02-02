@@ -106,7 +106,7 @@ const InteractiveLine: React.FC<InteractiveLineProps> = ({
                 quran-line cursor-pointer select-none
                 transition-all duration-200
                 hover:bg-primary/5 active:bg-primary/10
-                rounded-lg px-1 -mx-1
+                rounded-lg
                 ${isPlaying ? 'bg-emerald-500/20 rounded-lg' : ''}
             `}
             onMouseDown={handlePressStart}

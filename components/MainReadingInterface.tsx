@@ -12,9 +12,7 @@ const MainReadingInterface: React.FC = () => {
     const mainContentRef = useRef<HTMLDivElement>(null);
     const touchStartX = useRef(0);
     const touchStartY = useRef(0);
-    const initialPinchDistance = useRef(0);
-    const lastFontSize = useRef(state.fontSize);
-    const gestureState = useRef<'none' | 'swipe' | 'pinch'>('none');
+    // Removed pinch-to-zoom related refs as font size is now automatic
 
     const [isDesktopView, setIsDesktopView] = useState(window.innerWidth > 1024);
 
@@ -30,48 +28,25 @@ const MainReadingInterface: React.FC = () => {
         return () => mediaQuery.removeEventListener('change', handleResize);
     }, [actions, state.currentPage]);
 
-    const getDistance = (touches: React.TouchList) => {
-        const [touch1, touch2] = [touches[0], touches[1]];
-        return Math.sqrt(
-            Math.pow(touch2.clientX - touch1.clientX, 2) +
-            Math.pow(touch2.clientY - touch1.clientY, 2)
-        );
-    };
-
+    // Handle touch start for swipe navigation only
+    // Pinch-to-zoom font control removed - font size is now automatic
     const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
         actions.recordUserActivity();
         if (e.touches.length === 1) {
-            gestureState.current = 'swipe';
             touchStartX.current = e.touches[0].clientX;
             touchStartY.current = e.touches[0].clientY;
-        } else if (e.touches.length === 2) {
-            gestureState.current = 'pinch';
-            e.preventDefault();
-            initialPinchDistance.current = getDistance(e.touches);
-            lastFontSize.current = state.fontSize;
-        } else {
-            gestureState.current = 'none';
         }
     };
 
-    const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-        if (gestureState.current === 'pinch' && e.touches.length === 2) {
-            e.preventDefault();
-            const newDistance = getDistance(e.touches);
-            const scale = newDistance / (initialPinchDistance.current || 1); // Avoid division by zero
-
-            let newSize = Math.round(lastFontSize.current * scale);
-            newSize = Math.max(16, Math.min(36, newSize)); // Clamp font size
-
-            if (newSize !== state.fontSize) {
-                actions.setFontSize(newSize);
-            }
-        }
+    // Touch move handler - pinch-to-zoom removed as font is automatic
+    const handleTouchMove = (_e: React.TouchEvent<HTMLDivElement>) => {
+        // No-op: font size is now automatic and cannot be changed by gestures
     };
 
 
+    // Handle touch end for swipe page navigation
     const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
-        if (gestureState.current === 'swipe' && e.changedTouches.length === 1) {
+        if (e.changedTouches.length === 1) {
             const touchEndX = e.changedTouches[0].clientX;
             const touchEndY = e.changedTouches[0].clientY;
             const diffX = touchEndX - touchStartX.current;
@@ -90,11 +65,6 @@ const MainReadingInterface: React.FC = () => {
                     actions.loadPage(newPage);
                 }
             }
-        }
-
-        if (e.touches.length === 0) {
-            gestureState.current = 'none';
-            initialPinchDistance.current = 0;
         }
     };
 
@@ -132,20 +102,11 @@ const MainReadingInterface: React.FC = () => {
             return <DesktopBookLayout />;
         }
         return (
-            <div className="w-full min-h-full flex items-start justify-center px-4 pb-4 md:px-8 md:pb-8" data-main-bg>
+            <div className="w-full min-h-full flex items-start justify-center px-2 pb-4" data-main-bg>
                 <QuranPage key={state.currentPage} pageVerses={state.pageData.right} />
             </div>
         );
     };
-
-    // Define heights for padding calculation
-    const isAudioOpen = !isDesktopView && state.activePanel === Panel.Audio;
-    const headerVisibleHeight = `calc(4.5rem + env(safe-area-inset-top, 0rem))`;
-    const bottomNavVisibleHeight = `calc(${isAudioOpen ? '13rem' : '4.5rem'} + env(safe-area-inset-bottom, 0rem))`;
-
-    // When UI is hidden, padding should only account for safe areas to prevent content from going under notches.
-    const headerHiddenHeight = `env(safe-area-inset-top, 0rem)`;
-    const bottomNavHiddenHeight = `env(safe-area-inset-bottom, 0rem)`;
 
     return (
         <div className="h-full w-full">
@@ -154,9 +115,9 @@ const MainReadingInterface: React.FC = () => {
                 ref={mainContentRef}
                 className="h-full w-full overflow-y-auto custom-scrollbar bg-bg-secondary"
                 style={{
-                    paddingTop: state.isUIVisible ? headerVisibleHeight : headerHiddenHeight,
-                    paddingBottom: state.isUIVisible ? bottomNavVisibleHeight : bottomNavHiddenHeight,
-                    transition: 'padding-top 0.3s ease-in-out, padding-bottom 0.3s ease-in-out',
+                    // Fixed padding for safe areas only - content doesn't move when UI toggles
+                    paddingTop: 'env(safe-area-inset-top, 0rem)',
+                    paddingBottom: 'env(safe-area-inset-bottom, 0rem)',
                 }}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
@@ -172,7 +133,7 @@ const MainReadingInterface: React.FC = () => {
             >
                 {renderContent()}
             </main>
-            <BottomNav />
+            {!isDesktopView && <BottomNav />}
         </div>
     );
 };

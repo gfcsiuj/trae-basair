@@ -5,6 +5,25 @@ import SurahHeader from './SurahHeader';
 import InteractiveLine from './InteractiveLine';
 import { Verse } from '../types';
 
+// Calculate optimal font size based on viewport for Quran-like experience
+// This creates a fixed, automatic sizing that fills the screen beautifully like a real Quran
+const getResponsiveFontSize = () => {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const isLandscape = vw > vh;
+
+    if (isLandscape) {
+        // Landscape mode: text fills width horizontally, scroll vertically
+        // Use 5.5% of viewport width to fill the screen in landscape
+        return Math.min(Math.max(vw * 0.055, 22), 55);
+    } else {
+        // Portrait mode: text fills the full screen width like a Quran page
+        // Use ~6% of viewport width for immersive, beautiful Quran reading
+        // This fits approximately 15-16 lines per page
+        return Math.min(Math.max(vw * 0.06, 20), 38);
+    }
+};
+
 interface LineData {
     line_number: number;
     line_type: 'surah_name' | 'basmallah' | 'ayah';
@@ -18,8 +37,29 @@ const QuranPage: React.FC<{
     pageVerses: Verse[] | null;
 }> = ({ pageVerses }) => {
     const { state } = useApp();
-    const { isLoading, error, font, fontSize, surahs, wordGlyphData, layoutDb, currentPage } = state;
+    const { isLoading, error, font, surahs, wordGlyphData, layoutDb, currentPage } = state;
+    const [responsiveFontSize, setResponsiveFontSize] = useState(getResponsiveFontSize());
+    const [isLandscape, setIsLandscape] = useState(window.innerWidth > window.innerHeight);
     const [linesForPage, setLinesForPage] = useState<LineData[]>([]);
+
+    // Effect to handle responsive font sizing and orientation changes
+    useEffect(() => {
+        const handleResize = () => {
+            setResponsiveFontSize(getResponsiveFontSize());
+            setIsLandscape(window.innerWidth > window.innerHeight);
+        };
+
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', handleResize);
+
+        // Initial calculation
+        handleResize();
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('orientationchange', handleResize);
+        };
+    }, []);
 
     // Effect to load page-specific font
     useEffect(() => {
@@ -157,11 +197,22 @@ const QuranPage: React.FC<{
         return null;
     }
 
+    // Calculate line height based on orientation for optimal reading
+    // Portrait: 1.95 to fit ~15 lines per page like a Quran
+    // Landscape: 1.8 for comfortable horizontal reading with scroll
+    const lineHeightValue = isLandscape ? 1.8 : 1.95;
+
     const pageStyle: React.CSSProperties = {
         fontFamily: font === 'qpc-v1' ? 'QuranPageFontV2' : 'inherit',
-        fontSize: `${fontSize}px`,
+        // Use responsive font size that auto-scales based on device
+        fontSize: `${responsiveFontSize}px`,
         direction: 'rtl',
-        lineHeight: 2.2,
+        lineHeight: lineHeightValue,
+        // Prevent text size adjustment by mobile browsers
+        WebkitTextSizeAdjust: '100%',
+        textSizeAdjust: '100%',
+        // Ensure text fills the full width
+        width: '100%',
     };
 
     const juzNumber = pageVerses?.[0]?.juz_number;

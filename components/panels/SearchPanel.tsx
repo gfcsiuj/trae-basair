@@ -16,7 +16,7 @@ const SearchPanel: React.FC = () => {
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     const performSearch = useCallback(async (searchQuery: string) => {
-        if (searchQuery.trim().length < 3) {
+        if (searchQuery.trim().length < 2) {
             setResults([]);
             setError(null);
             return;
@@ -24,22 +24,23 @@ const SearchPanel: React.FC = () => {
         setIsLoading(true);
         setError(null);
         try {
-            // Revert to the stable quran.com API endpoint as the other one is unreliable
-            const url = `${API_BASE}/search?q=${encodeURIComponent(searchQuery)}&language=ar&size=50`;
+            // Use the search API endpoint with proper encoding
+            const trimmedQuery = searchQuery.trim();
+            const url = `${API_BASE}/search?q=${encodeURIComponent(trimmedQuery)}&size=50&page=1&language=ar`;
             const data = await actions.fetchWithRetry<SearchResponse>(url);
 
             if (data.search && data.search.results) {
                 const searchResults = data.search.results;
                 setResults(searchResults);
                 if (searchResults.length === 0) {
-                    setError('لم يتم العثور على نتائج.');
+                    setError('لم يتم العثور على نتائج. جرّب كلمات مختلفة.');
                 }
             } else {
                 throw new Error('Invalid API response structure');
             }
         } catch (err) {
             console.error('Search failed:', err);
-            setError('فشل البحث. يرجى المحاولة مرة أخرى.');
+            setError('فشل البحث. تأكد من اتصالك بالإنترنت.');
             setResults([]);
         } finally {
             setIsLoading(false);
@@ -63,7 +64,7 @@ const SearchPanel: React.FC = () => {
             if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
         };
     }, [query, performSearch, state.activePanel]);
-    
+
     useEffect(() => {
         return () => {
             if (audioRef.current) {
@@ -85,22 +86,22 @@ const SearchPanel: React.FC = () => {
 
     const handlePlayAudio = async (e: React.MouseEvent, verseKey: string) => {
         e.stopPropagation();
-    
+
         if (playingVerseKey === verseKey && audioRef.current) {
             audioRef.current.pause();
             setPlayingVerseKey(null);
             return;
         }
-    
+
         if (audioRef.current) {
             audioRef.current.pause();
         }
-    
+
         setPlayingVerseKey(verseKey);
-    
+
         let audioUrl = '';
         const reciterId = state.selectedReciterId;
-    
+
         try {
             if (reciterId >= 1001) {
                 const [surahIdStr, ayahIdStr] = verseKey.split(':');
@@ -122,7 +123,7 @@ const SearchPanel: React.FC = () => {
                     audioUrl = `${AUDIO_BASE}${verseData.verse.audio.url}`;
                 }
             }
-    
+
             if (audioUrl) {
                 const audio = new Audio(audioUrl);
                 audioRef.current = audio;
@@ -160,17 +161,18 @@ const SearchPanel: React.FC = () => {
         if (error) {
             return (
                 <div className="text-center py-10 text-text-secondary">
-                     <i className="fas fa-exclamation-circle text-3xl mb-2"></i>
+                    <i className="fas fa-exclamation-circle text-3xl mb-2"></i>
                     <p>{error}</p>
                 </div>
             );
         }
-        if (!query || query.trim().length < 3) {
-             return (
-                <div className="text-center py-10 text-text-secondary">
-                    <i className="fas fa-search text-3xl mb-2"></i>
-                    <p>ابحث عن آية في القرآن الكريم</p>
-                    <p className="text-xs mt-1">اكتب ٣ أحرف على الأقل لبدء البحث</p>
+        if (!query || query.trim().length < 2) {
+            return (
+                <div className="text-center py-10 text-text-secondary px-4">
+                    <i className="fas fa-search text-3xl mb-3"></i>
+                    <p className="font-medium">ابحث عن آية في القرآن الكريم</p>
+                    <p className="text-xs mt-2 opacity-80">جرّب البحث بالإنجليزية مثل: allah, rahman, salat</p>
+                    <p className="text-xs mt-1 opacity-60">أو بالعربية مثل: الرحمن، الصلاة</p>
                 </div>
             );
         }
@@ -182,9 +184,9 @@ const SearchPanel: React.FC = () => {
                         const surahName = state.surahs.find(s => s.id === parseInt(surahNum))?.name_arabic || '';
                         const isPlaying = playingVerseKey === result.verse_key;
                         return (
-                            <div 
-                                key={result.verse_key} 
-                                onClick={() => handleNavigateToVerse(result.verse_key)} 
+                            <div
+                                key={result.verse_key}
+                                onClick={() => handleNavigateToVerse(result.verse_key)}
                                 className="card bg-bg-secondary p-4 rounded-lg cursor-pointer hover:bg-bg-tertiary transition-colors animate-listItemEnter"
                                 style={{ animationDelay: `${index * 30}ms` }}
                             >
